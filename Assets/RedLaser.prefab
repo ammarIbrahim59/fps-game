@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4844279269355613570}
   - component: {fileID: 237120663700304291}
   - component: {fileID: 3439723432599098683}
+  - component: {fileID: 5332102929599593332}
   m_Layer: 0
   m_Name: RedLaser
   m_TagString: Untagged
@@ -183,7 +184,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -201,3 +202,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 40
   lifeTime: 3
+--- !u!114 &5332102929599593332
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6507350542358332286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 688991ac91d6b3d41834e0c079e75237, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 20
+  damage: 10
+  lifeTime: 3
+  explosionPrefab: {fileID: 7724194583107279269, guid: 3397e7749faba9f43bf064cb1d7c936d, type: 3}

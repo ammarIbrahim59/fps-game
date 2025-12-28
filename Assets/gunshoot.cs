@@ -5,9 +5,10 @@ public class Gunshoot : MonoBehaviour
 {
     public float range = 500f;
     public float speed = 150f; 
+    public float damagePerShot = 1f; // How much damage your gun does
     public Camera fpsCam;
     public LineRenderer laserLine;
-    public Transform muzzle; // NEW: The point at the tip of your gun
+    public Transform muzzle; 
     public AudioSource shootSound;
 
     void Start()
@@ -22,7 +23,8 @@ public class Gunshoot : MonoBehaviour
             StartCoroutine(ShootLaser());
         }
     }
-   IEnumerator ShootLaser()
+
+    IEnumerator ShootLaser()
     {
         if (shootSound != null) shootSound.Play();
 
@@ -35,35 +37,43 @@ public class Gunshoot : MonoBehaviour
         {
             endPos = hit.point;
             
-            // This is what makes the turret die!
-            Target target = hit.transform.GetComponent<Target>();
-            if (target != null) target.Hit();
+            // --- UPDATED LOGIC FOR TURRETHEALTH ---
+            // 1. Look for the TurretHealth script on the object we hit
+            TurretHealth turret = hit.transform.GetComponent<TurretHealth>();
+            
+            if (turret != null)
+            {
+                // 2. Deal damage to the turret
+                turret.TakeDamage(damagePerShot);
+            }
+            else
+            {
+                // 3. Optional: Look in the parent object in case the collider is on a child
+                turret = hit.transform.GetComponentInParent<TurretHealth>();
+                if (turret != null) turret.TakeDamage(damagePerShot);
+            }
         }
         else
         {
-            // If you miss, the laser travels far into the sky
             endPos = fpsCam.transform.position + (fpsCam.transform.forward * range);
         }
 
         float distance = Vector3.Distance(muzzle.position, endPos);
-        float duration = distance / speed; // Speed should be about 50 in Inspector
+        float duration = distance / speed; 
         float timer = 0;
 
-         while (timer < duration)
+        while (timer < duration)
         {
             timer += Time.deltaTime;
             float progress = timer / duration;
             
-            // This line keeps the laser pinned to the gun even while you move
             laserLine.SetPosition(0, muzzle.position); 
-            
-            // This line calculates the travel path toward the target
             laserLine.SetPosition(1, Vector3.Lerp(muzzle.position, endPos, progress));
             yield return null;
         }
 
         laserLine.SetPosition(1, endPos); 
-        yield return new WaitForSeconds(0.15f); // Stay visible briefly so you see the hit
+        yield return new WaitForSeconds(0.15f); 
         laserLine.enabled = false;
     }
 }

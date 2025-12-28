@@ -13,15 +13,16 @@ public class TurretAimer : MonoBehaviour
     public float range = 20f;
     public float rotationSpeed = 5f;
     public float fireRate = 1f;
-    public float playerCenterOffset = 1.2f; 
+    public float playerCenterOffset = 1.5f; 
 
     [Header("Model Alignment")]
     public float headRotationOffset = -90f; 
 
-    // --- NEW HEALTH SYSTEM START ---
     [Header("Health System")]
     public int totalHealth = 3;
     public GameObject explosionEffect;
+
+    private float fireCountdown = 0f;
 
     public void TakeDamage(int damage)
     {
@@ -40,11 +41,8 @@ public class TurretAimer : MonoBehaviour
         {
             Instantiate(explosionEffect, transform.position, transform.rotation);
         }
-        Destroy(gameObject); // This destroys the whole RapidFireCannon
+        Destroy(gameObject); 
     }
-    // --- NEW HEALTH SYSTEM END ---
-
-    private float fireCountdown = 0f;
 
     void Update()
     {
@@ -80,6 +78,10 @@ public class TurretAimer : MonoBehaviour
 
     void Shoot()
     {
-        Instantiate(laserPrefab, firePoint.position, firePoint.rotation);
+        // We spawn the laser
+        GameObject laserGo = Instantiate(laserPrefab, firePoint.position, firePoint.rotation);
+        
+        // OPTIONAL: If your laser script needs to know who shot it or how much damage to do,
+        // you can grab a component from 'laserGo' here.
     }
 }
