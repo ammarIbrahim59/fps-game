@@ -80,7 +80,7 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
-        void Die()
+    void Die()
     {
         if (isDead) return;
         isDead = true;

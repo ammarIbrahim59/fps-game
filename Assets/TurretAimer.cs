@@ -11,23 +11,36 @@ public class TurretAimer : MonoBehaviour
 
     [Header("Stats")]
     public float range = 20f;
-    public float rotationSpeed = 5f;
+    public float rotationSpeed = 3f; 
     public float fireRate = 1f;
-    public float playerCenterOffset = 1.5f; 
+    public float playerCenterOffset = 1f; 
 
     [Header("Model Alignment")]
-    public float headRotationOffset = -90f; 
+    public float headRotationOffset = 7f; 
 
     [Header("Health System")]
     public int totalHealth = 3;
     public GameObject explosionEffect;
+    
+    [Header("Audio")]
+    public AudioClip explosionSound;
+    private AudioSource shootSound;
 
     private float fireCountdown = 0f;
+    private GameManager gameManager; // Cached reference
+
+    void Start()
+    {
+        shootSound = GetComponent<AudioSource>();
+        
+        // Find the manager once when the turret is created
+        gameManager = Object.FindAnyObjectByType<GameManager>();
+    }
 
     public void TakeDamage(int damage)
     {
         totalHealth -= damage;
-        Debug.Log("Turret Health: " + totalHealth);
+        Debug.Log(gameObject.name + " Health: " + totalHealth);
         
         if (totalHealth <= 0)
         {
@@ -35,12 +48,22 @@ public class TurretAimer : MonoBehaviour
         }
     }
 
+        // Inside your TurretAimer or Health script
     void Die()
     {
-        if (explosionEffect != null) 
+        // 1. Tell the GameManager a turret was destroyed
+        if (GameManager.Instance != null)
         {
-            Instantiate(explosionEffect, transform.position, transform.rotation);
+            GameManager.Instance.TurretDestroyed();
         }
+        else
+        {
+            // This will tell you if the script can't find the Manager
+            Debug.LogError("Turret can't find GameManager Instance!");
+        }
+
+        // 2. Play effects and destroy the turret
+        Debug.Log("Die function called!"); 
         Destroy(gameObject); 
     }
 
@@ -52,36 +75,38 @@ public class TurretAimer : MonoBehaviour
 
         if (distanceToPlayer <= range)
         {
-            // 1. Target the center of the player
             Vector3 targetPoint = player.position + Vector3.up * playerCenterOffset;
             Vector3 direction = targetPoint - turretHead.position;
             Quaternion lookRotation = Quaternion.LookRotation(direction);
 
-            // 2. Rotate Base (Y-axis only)
             Vector3 baseRotation = Quaternion.Lerp(turretBase.rotation, lookRotation, Time.deltaTime * rotationSpeed).eulerAngles;
             turretBase.rotation = Quaternion.Euler(0f, baseRotation.y, 0f);
 
-            // 3. Rotate Head with Offset
             float targetX = lookRotation.eulerAngles.x;
             Quaternion targetLocalRot = Quaternion.Euler(targetX + headRotationOffset, 0f, 0f);
             turretHead.localRotation = Quaternion.Lerp(turretHead.localRotation, targetLocalRot, Time.deltaTime * rotationSpeed);
 
-            // 4. Shooting
             if (fireCountdown <= 0f)
             {
                 Shoot();
                 fireCountdown = 1f / fireRate;
             }
         }
-        fireCountdown -= Time.deltaTime;
+        
+        fireCountdown -= Time.deltaTime; 
     }
 
     void Shoot()
     {
-        // We spawn the laser
-        GameObject laserGo = Instantiate(laserPrefab, firePoint.position, firePoint.rotation);
+        if (laserPrefab != null && firePoint != null)
+        {
+            Instantiate(laserPrefab, firePoint.position, firePoint.rotation);
+        }
         
-        // OPTIONAL: If your laser script needs to know who shot it or how much damage to do,
-        // you can grab a component from 'laserGo' here.
+        if (shootSound != null)
+        {
+            shootSound.pitch = Random.Range(0.9f, 1.1f);
+            shootSound.Play();
+        }
     }
 }
